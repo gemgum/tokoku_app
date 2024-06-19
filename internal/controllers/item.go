@@ -1,8 +1,11 @@
 package controllers
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
+	"os"
+	"strconv"
 	"time"
 	"tokoku_app/internal/models"
 	// "todo/internal/models"
@@ -18,16 +21,33 @@ func NewItemController(i *models.ItemModel) *ItemController {
 	}
 }
 
+func getScanner() string {
+	scanner := bufio.NewScanner(os.Stdin)
+	scanner.Scan()
+	choice := scanner.Text()
+	return choice
+}
 func (ic *ItemController) InserItem(id uint) (models.Item, error) {
+
 	var newData models.Item
 	newData.UpdatedAt = time.Now()
-	fmt.Print("\nMasukkan Data Barang ")
-	fmt.Print("Masukkan Nama ")
-	fmt.Scanln(&newData.ItemName)
+	fmt.Println("\nMasukkan Data Barang ")
+	newData.ItemName = getScanner()
+
 	fmt.Print("Masukkan Jumlah ")
-	fmt.Scanln(&newData.ItemStock)
+	val, err := strconv.Atoi(getScanner())
+	if err != nil {
+		fmt.Println(err)
+	}
+	newData.ItemStock = uint(val)
+
 	fmt.Print("Masukkan Harga ")
-	fmt.Scanln(&newData.Price)
+	val, err = strconv.Atoi(getScanner())
+	if err != nil {
+		fmt.Println(err)
+	}
+	newData.Price = uint(val)
+
 	newData.Employee = id
 	result, err := ic.model.InsertItem("public", newData)
 	if err != nil && !result {
@@ -39,7 +59,7 @@ func (ic *ItemController) InserItem(id uint) (models.Item, error) {
 func (ic *ItemController) InsertCustomer(id uint) (models.Customer, error) {
 	var newData models.Customer
 	newData.UpdatedAt = time.Now()
-	fmt.Print("\nPendaftaran Customer Baru")
+	fmt.Print("\nPendaftaran Customer Baru\n")
 	fmt.Print("Masukkan Nama ")
 	fmt.Scanln(&newData.Name)
 	fmt.Print("Masukkan Nomer Telfon ")
@@ -56,18 +76,23 @@ func (ic *ItemController) InsertCustomer(id uint) (models.Customer, error) {
 
 func (tc *ItemController) InsertTransaction(id_employee uint, id_customer uint) (models.Transaction, models.ItemTransaction, error) {
 	var newDataTrx models.Transaction
+
 	newDataTrx.UpdatedAt = time.Now()
 	newDataTrx.Employee = id_employee
-	newDataTrx.Employee = id_customer
+	newDataTrx.Customer = id_customer
+
+	fmt.Println("Employee", newDataTrx.Employee)
+	fmt.Println("Customer", newDataTrx.Customer)
 
 	var newDataTrxItem models.ItemTransaction
-
+	newDataTrxItem.UpdatedAt = time.Now()
 	fmt.Print("Masukkan Barang Yang Dibeli ")
-	fmt.Scanln(&newDataTrxItem.TrxId)
+	fmt.Scanln(&newDataTrxItem.Item)
+
 	fmt.Print("Masukkan Jumlah Barang Yang dibeli ")
 	fmt.Scanln(&newDataTrxItem.Amount)
 
-	newDataTrx.Employee = newDataTrx.ID
+	// newDataTrx.Employee = newDataTrx.ID
 
 	result, err := tc.model.InsertTransaction("public", newDataTrx, newDataTrxItem)
 

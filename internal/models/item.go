@@ -91,7 +91,7 @@ func (cm *ItemModel) InsertCustomer(schema string, cust Customer) (bool, error) 
 	query := fmt.Sprintf(`INSERT INTO "%s"."customers" 
 	("created_at","updated_at", "name", "phone", "address", "employee") 
 	VALUES (?, ?, ?, ?, ?, ?);`, schema)
-	res := cm.db.Debug().Exec(query, &cust.UpdatedAt, &cust.UpdatedAt, &cust.Name, &cust.Address, &cust.Employee)
+	res := cm.db.Debug().Exec(query, &cust.UpdatedAt, &cust.UpdatedAt, &cust.Name, &cust.Phone, &cust.Address, &cust.Employee)
 	err := res.Error
 	if err != nil {
 		return false, err
@@ -108,16 +108,17 @@ func (cm *ItemModel) InsertCustomer(schema string, cust Customer) (bool, error) 
 }
 
 func (cm *ItemModel) InsertTransaction(schema string, trx Transaction, trx_item ItemTransaction) (bool, error) {
+	// var trxId uint
 	query := fmt.Sprintf(`INSERT INTO "%s"."transactions" 
-	("created_at","updated_at", "trx_date", "phone", "customer", "employee") 
-	VALUES (?, ?, ?, ?, ?, ?);`, schema)
-	res := cm.db.Debug().Exec(query, &trx.UpdatedAt, &trx.UpdatedAt, &trx.UpdatedAt, &trx.Customer, &trx.Employee)
+	("created_at","updated_at", "trx_date", "customer", "employee") 
+	VALUES (?, ?, ?, ?, ?) RETURNING id;`, schema)
+	res := cm.db.Debug().Raw(query, &trx.UpdatedAt, &trx.UpdatedAt, &trx.UpdatedAt, &trx.Customer, &trx.Employee).Scan(&trx_item.TrxId)
 	err := res.Error
 	if err != nil {
 		return false, err
 	}
 	rowsAffected := res.RowsAffected
-	if rowsAffected > 0 {
+	if rowsAffected <= 0 {
 		err = fmt.Errorf("no rows affected")
 		return false, err
 
@@ -125,15 +126,15 @@ func (cm *ItemModel) InsertTransaction(schema string, trx Transaction, trx_item 
 
 	query = fmt.Sprintf(`INSERT INTO "%s"."item_transactions" 
 	("created_at","updated_at", "amount", "item", "trx_id") 
-	VALUES (?, ?, ?, ?, ?, ?);`, schema)
-	res = cm.db.Debug().Exec(query, &trx_item.UpdatedAt, &trx_item.Amount, &trx_item.Item, &trx_item.TrxId)
+	VALUES (?, ?, ?, ?, ?);`, schema)
+	res = cm.db.Debug().Exec(query, &trx_item.UpdatedAt, &trx_item.UpdatedAt, &trx_item.Amount, &trx_item.Item, &trx_item.TrxId)
 
 	err = res.Error
 	if err != nil {
 		return false, err
 	}
 	rowsAffected = res.RowsAffected
-	if rowsAffected > 0 {
+	if rowsAffected <= 0 {
 		err = fmt.Errorf("no rows affected")
 		return false, err
 
