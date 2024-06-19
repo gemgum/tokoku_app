@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"tokoku_app/configs"
+	"tokoku_app/internal/controllers"
 	"tokoku_app/internal/models"
 )
 
@@ -20,5 +21,18 @@ func main() {
 		&models.Customer{},
 		&models.Transaction{},
 		&models.ItemTransaction{})
+
+	im := models.NewItemModel(connection)
+	ic := controllers.NewItemController(im)
+
+	// em := models.NewEmployeeModel(connection)
+	// cm := controllers.NewEmployeeController(em)
+
+	// data, err := cm.Login()
+	// uc := controllers.(um)
+	// im.SelectItem(setup)
+
+	// cm.Register()
+	ic.InserItem(1)
 
 }
