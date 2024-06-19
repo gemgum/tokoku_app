@@ -1,12 +1,11 @@
 package main
 
 import (
-	"TOKOKU_APP/configs"
-	"TOKOKU_APP/internal/controllers"
-	"TOKOKU_APP/internal/models"
 	"bufio"
 	"fmt"
 	"os"
+	"tokoku_app/configs"
+	"tokoku_app/internal/models"
 )
 
 func main() {
@@ -24,8 +23,8 @@ func main() {
 		&models.Transaction{},
 		&models.ItemTransaction{})
 
-	im := models.NewItemModel(connection)
-	ic := controllers.NewItemController(im)
+	// im := models.NewItemModel(connection)
+	// ic := controllers.NewItemController(im)
 
 	// em := models.NewEmployeeModel(connection)
 	// cm := controllers.NewEmployeeController(em)
@@ -35,7 +34,7 @@ func main() {
 	// im.SelectItem(setup)
 
 	// cm.Register()
-	ic.InserItem(1)
+	// ic.InserItem(1)
 
 	scanner := bufio.NewScanner(os.Stdin)
 	var currentUser *models.Employee

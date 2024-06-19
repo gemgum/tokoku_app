@@ -1,8 +1,9 @@
 package models
 
 import (
-	"TOKOKU_APP/configs"
 	"fmt"
+
+	"tokoku_app/configs"
 
 	"gorm.io/gorm"
 )

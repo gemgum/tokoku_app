@@ -1,10 +1,10 @@
 package controllers
 
 import (
-	"TOKOKU_APP/internal/models"
 	"errors"
 	"fmt"
 	"time"
+	"tokoku_app/internal/models"
 	// "todo/internal/models"
 )
 
