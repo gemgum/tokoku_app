@@ -139,4 +139,77 @@ func (cm *ItemModel) InsertTransaction(schema string, trx Transaction, trx_item 
 
 	}
 	return true, nil
+
+}
+
+func (im *ItemModel) ItemUpdateInfo(schema string, item Item) (bool, error) {
+	query := fmt.Sprintf(`UPDATE "%s"."items"
+	 SET "updated_at", "item_name", "item_stock", "price", "employee" WHERE "items"."id")
+	  VALUES (?, ?, ?, ?, ?;`, schema)
+	res := im.db.Debug().Exec(query, &item.UpdatedAt, &item.ItemName, &item.ItemStock, &item.Price, &item.Employee, &item.ID)
+	err := res.Error
+	if err != nil {
+		return false, err
+	}
+	rowsAffected := res.RowsAffected
+	if rowsAffected > 0 {
+		err = fmt.Errorf("no rows affected")
+		return false, err
+
+	}
+	return true, nil
+}
+
+func (im *ItemModel) ItemEdit(schema string, item Item) (bool, error) {
+	query := fmt.Sprintf(`UPDATE "%s"."items"
+	 SET "updated_at", "item_name", "item_stock", "price", "employee" WHERE "items"."id")
+	  VALUES (?, ?, ?, ?, ?;`, schema)
+	res := im.db.Debug().Exec(query, &item.UpdatedAt, &item.ItemName, &item.ItemStock, &item.Price, &item.Employee, &item.ID)
+	err := res.Error
+	if err != nil {
+		return false, err
+	}
+	rowsAffected := res.RowsAffected
+	if rowsAffected > 0 {
+		err = fmt.Errorf("no rows affected")
+		return false, err
+
+	}
+	return true, nil
+}
+
+func (im *ItemModel) DeleteTransaction(schema string, item Item) (bool, error) {
+	query := fmt.Sprintf(`UPDATE "%s"."items"
+	 SET "deleted_at" WHERE "items"."id")
+	  VALUES (?, ?, ?, ?, ?;`, schema)
+	res := im.db.Debug().Exec(query, &item.UpdatedAt, &item.ItemName, &item.ItemStock, &item.Price, &item.Employee, &item.ID)
+	err := res.Error
+	if err != nil {
+		return false, err
+	}
+	rowsAffected := res.RowsAffected
+	if rowsAffected > 0 {
+		err = fmt.Errorf("no rows affected")
+		return false, err
+
+	}
+	return true, nil
+}
+
+func (im *ItemModel) DeleteItemTransaction(schema string, item Item) (bool, error) {
+	query := fmt.Sprintf(`UPDATE "%s"."item_transactions"
+	 SET "deleted_at" WHERE "item_transactions"."id")
+	  VALUES (?, ?, ?, ?, ?;`, schema)
+	res := im.db.Debug().Exec(query, &item.UpdatedAt, &item.ItemName, &item.ItemStock, &item.Price, &item.Employee, &item.ID)
+	err := res.Error
+	if err != nil {
+		return false, err
+	}
+	rowsAffected := res.RowsAffected
+	if rowsAffected > 0 {
+		err = fmt.Errorf("no rows affected")
+		return false, err
+
+	}
+	return true, nil
 }

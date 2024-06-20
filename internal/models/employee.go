@@ -69,3 +69,53 @@ func (em *EmployeeModel) Register(schema string, newEmployee Employee) (bool, er
 	}
 	return true, nil
 }
+
+func (em *EmployeeModel) DeleteCustData(schema string, emp Employee) (bool, error) {
+	query := fmt.Sprintf(`DELETE FROM "%s"."employees" WHERE "employees"."id" = ?;`, schema)
+
+	// query = ` UPDATE "be23"."todos" SET "deleted_at"= ?
+	// WHERE (owner = ? AND activity = ?) AND "todos"."deleted_at" IS NULL `
+
+	res := em.db.Debug().Exec(query, emp.ID)
+
+	err := res.Error
+	if err != nil {
+		// return Todo{}, err
+		return false, err
+
+	}
+
+	rowsAffected := res.RowsAffected
+	if rowsAffected > 0 {
+		// return Todo{}, err
+		err = fmt.Errorf("no rows affected")
+		return false, err
+
+	}
+	return true, nil
+}
+
+func (em *EmployeeModel) DeleteEmployeData(schema string, emp Employee) (bool, error) {
+	query := fmt.Sprintf(`DELETE FROM "%s"."employees" WHERE "employees"."id" = ?;`, schema)
+
+	// query = ` UPDATE "be23"."todos" SET "deleted_at"= ?
+	// WHERE (owner = ? AND activity = ?) AND "todos"."deleted_at" IS NULL `
+
+	res := em.db.Debug().Exec(query, emp.ID)
+
+	err := res.Error
+	if err != nil {
+		// return Todo{}, err
+		return false, err
+
+	}
+
+	rowsAffected := res.RowsAffected
+	if rowsAffected > 0 {
+		// return Todo{}, err
+		err = fmt.Errorf("no rows affected")
+		return false, err
+
+	}
+	return true, nil
+}

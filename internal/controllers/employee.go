@@ -45,3 +45,15 @@ func (uc *EmployeeController) Register() (models.Employee, error) {
 	}
 	return newData, nil
 }
+
+func (uc *EmployeeController) DeleteCustData() error {
+	var NewData models.Employee
+	NewData.UpdatedAt = time.Now()
+	fmt.Print("Masukkan ID ")
+	fmt.Scanln(&NewData.ID)
+	result, err := uc.model.DeleteCustData("public", NewData)
+	if err != nil && !result {
+		return errors.New("terjadi masalah ketika menghapus data customer")
+	}
+	return nil
+}
