@@ -84,21 +84,30 @@ func (tc *ItemController) InsertTransaction(id_employee uint, id_customer uint) 
 	fmt.Println("Employee", newDataTrx.Employee)
 	fmt.Println("Customer", newDataTrx.Customer)
 
-	var newDataTrxItem models.ItemTransaction
-	newDataTrxItem.UpdatedAt = time.Now()
-	fmt.Print("Masukkan Barang Yang Dibeli ")
-	fmt.Scanln(&newDataTrxItem.Item)
-
-	fmt.Print("Masukkan Jumlah Barang Yang dibeli ")
-	fmt.Scanln(&newDataTrxItem.Amount)
-
-	// newDataTrx.Employee = newDataTrx.ID
-
-	result, err := tc.model.InsertTransaction("public", newDataTrx, newDataTrxItem)
+	trxId, result, err := tc.model.InsertTransaction("public", newDataTrx)
 
 	if err != nil && !result {
 		return models.Transaction{}, models.ItemTransaction{}, errors.New("terjadi masalah ketika membuat transaksi")
 	}
+	var newDataTrxItem models.ItemTransaction
+	newDataTrxItem.UpdatedAt = time.Now()
+	var lanjutBeli string = "Y"
+	for lanjutBeli == "Y" {
+		fmt.Print("\nMasukkan Barang Yang Dibeli ")
+		fmt.Scanln(&newDataTrxItem.Item)
+
+		fmt.Print("Masukkan Jumlah Barang Yang dibeli ")
+		fmt.Scanln(&newDataTrxItem.Amount)
+
+		result, err := tc.model.InsertItemTransaction("public", uint(trxId), newDataTrxItem)
+		if err != nil && !result {
+			return models.Transaction{}, models.ItemTransaction{}, errors.New("terjadi masalah ketika membuat transaksi item")
+		}
+		fmt.Print("Lanjutkan membeli ? (Y/n) ")
+		fmt.Scanln(&lanjutBeli)
+	}
+	// newDataTrx.Employee = newDataTrx.ID
+
 	return newDataTrx, newDataTrxItem, nil
 }
 

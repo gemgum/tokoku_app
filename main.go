@@ -84,6 +84,7 @@ func main() {
 					if err != nil {
 						fmt.Println(err)
 					}
+
 				case "4":
 					_, err := ic.InsertCustomer(data.ID)
 					if err != nil {

@@ -107,33 +107,39 @@ func (cm *ItemModel) InsertCustomer(schema string, cust Customer) (bool, error) 
 	return true, nil
 }
 
-func (cm *ItemModel) InsertTransaction(schema string, trx Transaction, trx_item ItemTransaction) (bool, error) {
+func (cm *ItemModel) InsertTransaction(schema string, trx Transaction) (int, bool, error) {
 	// var trxId uint
 	query := fmt.Sprintf(`INSERT INTO "%s"."transactions" 
 	("created_at","updated_at", "trx_date", "customer", "employee") 
 	VALUES (?, ?, ?, ?, ?) RETURNING id;`, schema)
-	res := cm.db.Debug().Raw(query, &trx.UpdatedAt, &trx.UpdatedAt, &trx.UpdatedAt, &trx.Customer, &trx.Employee).Scan(&trx_item.TrxId)
+	var TrxId int
+	res := cm.db.Debug().Raw(query, &trx.UpdatedAt, &trx.UpdatedAt, &trx.UpdatedAt, &trx.Customer, &trx.Employee).Scan(&TrxId)
+	err := res.Error
+	if err != nil {
+		return 0, false, err
+	}
+	rowsAffected := res.RowsAffected
+	if rowsAffected <= 0 {
+		err = fmt.Errorf("no rows affected")
+		return 0, false, err
+
+	}
+	return TrxId, true, nil
+}
+
+func (cm *ItemModel) InsertItemTransaction(schema string, trx_id uint, trx_item ItemTransaction) (bool, error) {
+
+	query := fmt.Sprintf(`INSERT INTO "%s"."item_transactions" 
+	("created_at","updated_at", "amount", "item", "trx_id") 
+	VALUES (?, ?, ?, ?, ?);`, schema)
+	trx_item.TrxId = trx_id
+	res := cm.db.Debug().Exec(query, &trx_item.UpdatedAt, &trx_item.UpdatedAt, &trx_item.Amount, &trx_item.Item, &trx_item.TrxId)
+
 	err := res.Error
 	if err != nil {
 		return false, err
 	}
 	rowsAffected := res.RowsAffected
-	if rowsAffected <= 0 {
-		err = fmt.Errorf("no rows affected")
-		return false, err
-
-	}
-
-	query = fmt.Sprintf(`INSERT INTO "%s"."item_transactions" 
-	("created_at","updated_at", "amount", "item", "trx_id") 
-	VALUES (?, ?, ?, ?, ?);`, schema)
-	res = cm.db.Debug().Exec(query, &trx_item.UpdatedAt, &trx_item.UpdatedAt, &trx_item.Amount, &trx_item.Item, &trx_item.TrxId)
-
-	err = res.Error
-	if err != nil {
-		return false, err
-	}
-	rowsAffected = res.RowsAffected
 	if rowsAffected <= 0 {
 		err = fmt.Errorf("no rows affected")
 		return false, err
@@ -141,7 +147,6 @@ func (cm *ItemModel) InsertTransaction(schema string, trx Transaction, trx_item 
 	}
 	return true, nil
 }
-
 func (im *ItemModel) RemoveItem(schema string, item Item) (bool, error) {
 
 	query := fmt.Sprintf(`UPDATE "%s"."items" SET "deleted_at"= ? 
@@ -149,12 +154,10 @@ func (im *ItemModel) RemoveItem(schema string, item Item) (bool, error) {
 	res := im.db.Debug().Exec(query, &item.UpdatedAt, &item.ID)
 	err := res.Error
 	if err != nil {
-		// return Todo{}, err
 		return false, err
 	}
 	rowsAffected := res.RowsAffected
 	if rowsAffected <= 0 {
-		// return Todo{}, err
 		err = fmt.Errorf("no rows affected")
 		return false, err
 	}
