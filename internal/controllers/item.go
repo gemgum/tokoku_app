@@ -261,3 +261,69 @@ func (tc *ItemController) ShowTransaction(idEmployee uint) ([]models.Transaction
 	fmt.Println()
 	return trxRrv, nil
 }
+
+func (ic *ItemController) EditItemStock() (models.Item, error) {
+
+	var newData models.Item
+	newData.UpdatedAt = time.Now()
+	fmt.Print("\nMasukkan ID Barang : ")
+
+	val, err := strconv.Atoi(getScanner())
+	if err != nil {
+		fmt.Println(err)
+	}
+	newData.ID = uint(val)
+
+	fmt.Print("Masukkan Jumlah Barang : ")
+
+	val, err = strconv.Atoi(getScanner())
+	if err != nil {
+		fmt.Println(err)
+	}
+	newData.ItemStock = uint(val)
+
+	result, err := ic.model.EditItemStock("public", newData)
+	if err != nil && !result {
+		return models.Item{}, errors.New("terjadi masalah ketika memasukan data")
+	}
+	return newData, nil
+}
+
+func (ic *ItemController) EditItem() (models.Item, error) {
+
+	var newData models.Item
+	newData.UpdatedAt = time.Now()
+	fmt.Print("\nMasukkan ID Barang : ")
+
+	val, err := strconv.Atoi(getScanner())
+	if err != nil {
+		fmt.Println(err)
+	}
+	newData.ID = uint(val)
+
+	fmt.Print("Edit Nama Barang : ")
+
+	newData.ItemName = getScanner()
+
+	fmt.Print("Edit Harga Barang : ")
+
+	val, err = strconv.Atoi(getScanner())
+	if err != nil {
+		fmt.Println(err)
+	}
+	newData.Price = uint(val)
+
+	fmt.Print("Edit Jumlah Barang : ")
+
+	val, err = strconv.Atoi(getScanner())
+	if err != nil {
+		fmt.Println(err)
+	}
+	newData.ItemStock = uint(val)
+
+	result, err := ic.model.EditItem("public", newData)
+	if err != nil && !result {
+		return models.Item{}, errors.New("terjadi masalah ketika memasukan data")
+	}
+	return newData, nil
+}

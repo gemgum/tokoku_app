@@ -300,3 +300,35 @@ func (tm *ItemModel) ShowTransaction(trx Transaction) ([]TransactionResult, erro
 	}
 	return trxRv, nil
 }
+
+func (im *ItemModel) EditItemStock(schema string, item Item) (bool, error) {
+	query := fmt.Sprintf(`UPDATE "%s"."items" SET "item_stock"= ?, "updated_at"= ?
+	WHERE id = ? AND "deleted_at" IS NULL;`, schema)
+	res := im.db.Debug().Exec(query, &item.ItemStock, &item.UpdatedAt, &item.ID)
+	err := res.Error
+	if err != nil {
+		return false, err
+	}
+	rowsAffected := res.RowsAffected
+	if rowsAffected <= 0 {
+		err = fmt.Errorf("no rows affected")
+		return false, err
+	}
+	return true, nil
+}
+
+func (im *ItemModel) EditItem(schema string, item Item) (bool, error) {
+	query := fmt.Sprintf(`UPDATE "%s"."items" SET "updated_at"= ?, "item_name"= ?, "price"= ?, "item_stock"= ?
+	WHERE id = ? AND "deleted_at" IS NULL;`, schema)
+	res := im.db.Debug().Exec(query, &item.UpdatedAt, &item.ItemName, &item.Price, &item.ItemStock, &item.ID)
+	err := res.Error
+	if err != nil {
+		return false, err
+	}
+	rowsAffected := res.RowsAffected
+	if rowsAffected <= 0 {
+		err = fmt.Errorf("no rows affected")
+		return false, err
+	}
+	return true, nil
+}
