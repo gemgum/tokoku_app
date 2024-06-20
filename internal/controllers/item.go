@@ -111,6 +111,67 @@ func (tc *ItemController) InsertTransaction(id_employee uint, id_customer uint) 
 	return newDataTrx, newDataTrxItem, nil
 }
 
+func (ic *ItemController) ItemUpdateInfo(id uint) (models.Item, error) {
+	var newUpdateItem models.Item
+	newUpdateItem.UpdatedAt = time.Now()
+	fmt.Print("\nEdit Data Item ")
+	fmt.Print("Masukkan Nama ")
+	fmt.Scanln(&newUpdateItem.ItemName)
+	fmt.Print("Masukkan Jumlah ")
+	fmt.Scanln(&newUpdateItem.ItemStock)
+	fmt.Print("Masukkan Harga ")
+	fmt.Scanln(&newUpdateItem.Price)
+	newUpdateItem.Employee = id
+	result, err := ic.model.ItemUpdateInfo("public", newUpdateItem)
+	if err != nil && !result {
+		return models.Item{}, errors.New("terjadi masalah ketika memasukan data")
+	}
+	return newUpdateItem, nil
+}
+
+func (ic *ItemController) ItemEdit(id uint) (models.Item, error) {
+	var newItemEdit models.Item
+	newItemEdit.UpdatedAt = time.Now()
+	fmt.Print("\nEdit Data Item ")
+	fmt.Print("Masukkan Nama ")
+	fmt.Scanln(&newItemEdit.ItemName)
+	fmt.Print("Masukkan Jumlah ")
+	fmt.Scanln(&newItemEdit.ItemStock)
+	fmt.Print("Masukkan Harga ")
+	fmt.Scanln(&newItemEdit.Price)
+	newItemEdit.Employee = id
+	result, err := ic.model.ItemEdit("public", newItemEdit)
+	if err != nil && !result {
+		return models.Item{}, errors.New("terjadi masalah ketika memasukan data")
+	}
+	return newItemEdit, nil
+}
+
+func (ic *ItemController) DeleteTransaction(id uint) error {
+	var newData models.Item
+	newData.ID = id
+	result, err := ic.model.DeleteTransaction("public", newData)
+	if err != nil {
+		return fmt.Errorf("terjadi masalah ketika menghapus transaksi: %v", err)
+	}
+	if !result {
+		return errors.New("gagal menghapus transaksi, id tidak ditemukan")
+	}
+	return nil
+}
+
+func (ic *ItemController) DeleteItemTransaction(id uint) error {
+	var newData models.Item
+	newData.ID = id
+	result, err := ic.model.DeleteItemTransaction("public", newData)
+	if err != nil {
+		return fmt.Errorf("terjadi masalah ketika menghapus transaksi: %v", err)
+	}
+	if !result {
+		return errors.New("gagal menghapus transaksi, id tidak ditemukan")
+	}
+	return nil
+}
 func (ic *ItemController) RemoveItem() (models.Item, error) {
 
 	var newData models.Item
