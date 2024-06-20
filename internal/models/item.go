@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"time"
 
 	"tokoku_app/configs"
 
@@ -185,17 +186,16 @@ func (im *ItemModel) ItemEdit(schema string, item Item) (bool, error) {
 	return true, nil
 }
 
-func (im *ItemModel) DeleteTransaction(schema string, item Item) (bool, error) {
-	query := fmt.Sprintf(`UPDATE "%s"."items"
-	 SET "deleted_at" WHERE "items"."id")
-	  VALUES (?, ?, ?, ?, ?;`, schema)
-	res := im.db.Debug().Exec(query, &item.UpdatedAt, &item.ItemName, &item.ItemStock, &item.Price, &item.Employee, &item.ID)
+func (im *ItemModel) DeleteTransaction(schema string, trx Transaction) (bool, error) {
+	query := fmt.Sprintf(`UPDATE "%s"."transactions" SET "deleted_at"= ? 
+	WHERE id = ? AND "deleted_at" IS NULL;`, schema)
+	res := im.db.Debug().Exec(query, &trx.UpdatedAt, &trx.ID)
 	err := res.Error
 	if err != nil {
 		return false, err
 	}
 	rowsAffected := res.RowsAffected
-	if rowsAffected > 0 {
+	if rowsAffected <= 0 {
 		err = fmt.Errorf("no rows affected")
 		return false, err
 
@@ -203,28 +203,124 @@ func (im *ItemModel) DeleteTransaction(schema string, item Item) (bool, error) {
 	return true, nil
 }
 
-func (im *ItemModel) DeleteItemTransaction(schema string, item Item) (bool, error) {
-	query := fmt.Sprintf(`UPDATE "%s"."item_transactions"
-	 SET "deleted_at" WHERE "item_transactions"."id")
-	  VALUES (?, ?, ?, ?, ?;`, schema)
-	res := im.db.Debug().Exec(query, &item.UpdatedAt, &item.ItemName, &item.ItemStock, &item.Price, &item.Employee, &item.ID)
+func (im *ItemModel) DeleteItemTransaction(schema string, itemTrx ItemTransaction) (bool, error) {
+	query := fmt.Sprintf(`UPDATE "%s"."item_transactions" SET "deleted_at"= ? 
+	WHERE id = ? AND "deleted_at" IS NULL;`, schema)
+	res := im.db.Debug().Exec(query, &itemTrx.UpdatedAt, &itemTrx.ID)
 	err := res.Error
 	if err != nil {
 		return false, err
 	}
 	rowsAffected := res.RowsAffected
-	if rowsAffected > 0 {
+	if rowsAffected <= 0 {
 		err = fmt.Errorf("no rows affected")
 		return false, err
 
 	}
 	return true, nil
 }
+
+func (cm *ItemModel) DeleteCustomerData(schema string, cust Customer) (bool, error) {
+	query := fmt.Sprintf(`UPDATE "%s"."customers" SET "deleted_at"= ? 
+	WHERE id = ? AND "deleted_at" IS NULL;`, schema)
+	res := cm.db.Debug().Exec(query, &cust.UpdatedAt, &cust.ID)
+	err := res.Error
+	if err != nil {
+		return false, err
+	}
+	rowsAffected := res.RowsAffected
+	if rowsAffected <= 0 {
+		err = fmt.Errorf("no rows affected")
+		return false, err
+
+	}
+	return true, nil
+}
+
+func (cm *ItemModel) DeleteEmployee(schema string, emp Employee) (bool, error) {
+	query := fmt.Sprintf(`UPDATE "%s"."employees" SET "deleted_at"= ? 
+	WHERE id = ? AND "deleted_at" IS NULL;`, schema)
+	res := cm.db.Debug().Exec(query, &emp.UpdatedAt, &emp.ID)
+	err := res.Error
+	if err != nil {
+		return false, err
+	}
+	rowsAffected := res.RowsAffected
+	if rowsAffected <= 0 {
+		err = fmt.Errorf("no rows affected")
+		return false, err
+
+	}
+	return true, nil
+}
+
 func (im *ItemModel) RemoveItem(schema string, item Item) (bool, error) {
 
 	query := fmt.Sprintf(`UPDATE "%s"."items" SET "deleted_at"= ? 
 	WHERE id = ? AND "deleted_at" IS NULL;`, schema)
 	res := im.db.Debug().Exec(query, &item.UpdatedAt, &item.ID)
+	err := res.Error
+	if err != nil {
+		return false, err
+	}
+	rowsAffected := res.RowsAffected
+	if rowsAffected <= 0 {
+		err = fmt.Errorf("no rows affected")
+		return false, err
+	}
+	return true, nil
+}
+
+type TransactionResult struct {
+	TanggalTransaksi time.Time `json:"tanggal_transaksi"`
+	NamaBarang       string    `json:"nama_barang"`
+	Jumlah           int       `json:"jumlah"`
+	Pembeli          string    `json:"pembeli"`
+	Pegawai          string    `json:"pegawai"`
+}
+
+func (tm *ItemModel) ShowTransaction(trx Transaction) ([]TransactionResult, error) {
+	trxRv := make([]TransactionResult, 0)
+	query := `select 
+     it.created_at as tanggal_transaksi,
+     it.item as nama_barang,
+     it.amount as jumlah,
+     t.customer as pembeli,
+     t.employee as pegawai
+ 	 from transactions t
+ 	 join employees e on e.id = t.employee 
+ 	 join item_transactions it on it.trx_id = t.id
+ 	 where t.customer = ? and t.employee = ?;`
+	err := tm.db.Debug().Raw(query, &trx.Customer, &trx.Employee).Scan(&trxRv).Error
+	fmt.Println(query)
+	if err != nil {
+		// return Todo{}, err
+		return nil, err
+
+	}
+	return trxRv, nil
+}
+
+func (im *ItemModel) EditItemStock(schema string, item Item) (bool, error) {
+	query := fmt.Sprintf(`UPDATE "%s"."items" SET "item_stock"= ?, "updated_at"= ?
+	WHERE id = ? AND "deleted_at" IS NULL;`, schema)
+	res := im.db.Debug().Exec(query, &item.ItemStock, &item.UpdatedAt, &item.ID)
+	err := res.Error
+	if err != nil {
+		return false, err
+	}
+	rowsAffected := res.RowsAffected
+	if rowsAffected <= 0 {
+		err = fmt.Errorf("no rows affected")
+		return false, err
+	}
+	return true, nil
+}
+
+func (im *ItemModel) EditItem(schema string, item Item) (bool, error) {
+	query := fmt.Sprintf(`UPDATE "%s"."items" SET "updated_at"= ?, "item_name"= ?, "price"= ?, "item_stock"= ?
+	WHERE id = ? AND "deleted_at" IS NULL;`, schema)
+	res := im.db.Debug().Exec(query, &item.UpdatedAt, &item.ItemName, &item.Price, &item.ItemStock, &item.ID)
 	err := res.Error
 	if err != nil {
 		return false, err

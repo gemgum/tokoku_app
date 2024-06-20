@@ -59,14 +59,15 @@ func main() {
 				fmt.Println("Selamat datang ", data.Name, ",")
 				fmt.Println("Pilih menu")
 				fmt.Println("1. Tambah Barang")
-				fmt.Println("2. Update Barang")
-				fmt.Println("3. Pembelian Barang")
-				fmt.Println("4. Pendaftaran Customer")
-				fmt.Println("5. Tampilkan Nota Pembelian")
+				fmt.Println("2. Pendaftaran Customer")
+				fmt.Println("3. Tampilkan Nota Pembelian")
+				fmt.Println("4. Pembelian Barang")
+				fmt.Println("5. Edit Barang")
+				fmt.Println("6. Update Jumlah Barang")
 				if data.ID == 0 {
 					fmt.Println("6. Hapus Data")
 				}
-				fmt.Println("9. Keluar")
+				fmt.Println("99. Keluar")
 				fmt.Print("Masukkan input: ")
 				scanner.Scan()
 				choice2 := scanner.Text()
@@ -76,7 +77,18 @@ func main() {
 					if err != nil {
 						fmt.Println(err)
 					}
+
+				case "2":
+					_, err := ic.InsertCustomer(data.ID)
+					if err != nil {
+						fmt.Println(err)
+					}
 				case "3":
+					_, err := ic.ShowTransaction(data.ID)
+					if err != nil {
+						fmt.Println(err)
+					}
+				case "4":
 					fmt.Print("Masukan ID Customer ")
 					var customerId uint
 					fmt.Scanln(&customerId)
@@ -84,17 +96,18 @@ func main() {
 					if err != nil {
 						fmt.Println(err)
 					}
-
-				case "4":
-					_, err := ic.InsertCustomer(data.ID)
+				case "5":
+					_, err := ic.EditItem()
 					if err != nil {
 						fmt.Println(err)
 					}
-
 				case "6":
-
-					for choice2 == "6" {
-
+					_, err := ic.EditItemStock()
+					if err != nil {
+						fmt.Println(err)
+					}
+				case "7":
+					for choice2 == "7" {
 						fmt.Println("Selamat datang di menu admin")
 						fmt.Println("Pilih menu")
 						fmt.Println("1. Pendaftaran Pegawai")
@@ -103,7 +116,8 @@ func main() {
 						fmt.Println("4. Hapus Transaksi Barang")
 						fmt.Println("5. Hapus Data Customer")
 						fmt.Println("6. Hapus Data Pegawai")
-						fmt.Println("9. Keluar")
+						fmt.Println("99. Keluar")
+						fmt.Print("Masukan Pilihan ")
 						scanner.Scan()
 						choice3 := scanner.Text()
 						switch choice3 {
@@ -117,34 +131,37 @@ func main() {
 							if err != nil {
 								fmt.Println(err)
 							}
+						case "3":
+							err := ic.DeleteTransaction()
+							if err != nil {
+								fmt.Println(err)
+							}
+						case "4":
+							err := ic.DeleteItemTransaction()
+							if err != nil {
+								fmt.Println(err)
+							}
+						case "5":
+							err := ic.DeleteCustomer()
+							if err != nil {
+								fmt.Println(err)
+							}
+						case "6":
+							err := ic.DeleteEmployee()
+							if err != nil {
+								fmt.Println(err)
+							}
+						default:
+							fmt.Println("Pilihan tidak tersedia")
 						}
 
 					}
+				default:
+					fmt.Println("Pilihan tidak tersedia")
+
 				}
 
 			}
-		// case "2":
-		// 	fmt.Println("===Silahkan Register===")
-		// 	// controllers.Register(connection)
-		// 	if currentUser != nil {
-		// 		fmt.Println("Register gagal")
-		// 	} else {
-		// 		fmt.Println("Register Berhasil, Selamat Datang ^^")
-		// 	}
-
-		// case "3":
-		// 	if currentUser == nil {
-		// 		fmt.Println("Silahkan login terlebih dahulu")
-		// 		continue
-		// 	}
-		// 	fmt.Println("===Hapus Item===")
-		// 	fmt.Print("Masukkan ID item yang ingin di hapus : ")
-		// 	scanner.Scan()
-		// 	if err != nil {
-		// 		fmt.Println("Hapus item gagal", err.Error())
-		// 	} else {
-		// 		fmt.Println("Hapus item Berhasil")
-		// 	}
 
 		case "4":
 			fmt.Println("Terima Kasih ^^")
@@ -152,8 +169,8 @@ func main() {
 
 		default:
 			fmt.Println("Pilihan tidak tersedia")
-		}
 
+		}
 	}
 
 }
