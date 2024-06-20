@@ -78,7 +78,7 @@ func (im *ItemModel) InsertItem(schema string, item Item) (bool, error) {
 	}
 
 	rowsAffected := res.RowsAffected
-	if rowsAffected > 0 {
+	if rowsAffected <= 0 {
 		err = fmt.Errorf("no rows affected")
 		return false, err
 
@@ -98,7 +98,7 @@ func (cm *ItemModel) InsertCustomer(schema string, cust Customer) (bool, error) 
 	}
 
 	rowsAffected := res.RowsAffected
-	if rowsAffected > 0 {
+	if rowsAffected <= 0 {
 		err = fmt.Errorf("no rows affected")
 		return false, err
 
@@ -138,6 +138,25 @@ func (cm *ItemModel) InsertTransaction(schema string, trx Transaction, trx_item 
 		err = fmt.Errorf("no rows affected")
 		return false, err
 
+	}
+	return true, nil
+}
+
+func (im *ItemModel) RemoveItem(schema string, item Item) (bool, error) {
+
+	query := fmt.Sprintf(`UPDATE "%s"."items" SET "deleted_at"= ? 
+	WHERE id = ? AND "deleted_at" IS NULL;`, schema)
+	res := im.db.Debug().Exec(query, &item.UpdatedAt, &item.ID)
+	err := res.Error
+	if err != nil {
+		// return Todo{}, err
+		return false, err
+	}
+	rowsAffected := res.RowsAffected
+	if rowsAffected <= 0 {
+		// return Todo{}, err
+		err = fmt.Errorf("no rows affected")
+		return false, err
 	}
 	return true, nil
 }

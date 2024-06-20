@@ -101,3 +101,21 @@ func (tc *ItemController) InsertTransaction(id_employee uint, id_customer uint) 
 	}
 	return newDataTrx, newDataTrxItem, nil
 }
+
+func (ic *ItemController) RemoveItem() (models.Item, error) {
+
+	var newData models.Item
+	newData.UpdatedAt = time.Now()
+	fmt.Println("\nMasukkan ID Barang ")
+
+	val, err := strconv.Atoi(getScanner())
+	if err != nil {
+		fmt.Println(err)
+	}
+	newData.ID = uint(val)
+	result, err := ic.model.RemoveItem("public", newData)
+	if err != nil && !result {
+		return models.Item{}, errors.New("terjadi masalah ketika memasukan data")
+	}
+	return newData, nil
+}

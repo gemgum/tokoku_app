@@ -45,17 +45,3 @@ func (uc *EmployeeController) Register() (models.Employee, error) {
 	}
 	return newData, nil
 }
-
-func (uc *EmployeeController) IntializeAdminAccount() (models.Employee, error) {
-	var newData models.Employee
-	newData.UpdatedAt = time.Now()
-	newData.Name = "admin"
-	newData.Email = "admin"
-	newData.Password = "admin"
-	newData.ID = 0
-	result, err := uc.model.IntializeAdminAccount("public", newData)
-	if err != nil && !result {
-		return models.Employee{}, errors.New("terjadi masalah ketika menginisialisasi admin")
-	}
-	return newData, nil
-}

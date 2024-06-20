@@ -50,32 +50,7 @@ func (em *EmployeeModel) Register(schema string, newEmployee Employee) (bool, er
 
 	}
 	rowsAffected := res.RowsAffected
-	if rowsAffected > 0 {
-		// return Todo{}, err
-		err = fmt.Errorf("no rows affected")
-		return false, err
-
-	}
-	return true, nil
-}
-
-func (em *EmployeeModel) IntializeAdminAccount(schema string, newEmployee Employee) (bool, error) {
-	query := fmt.Sprintf(`INSERT INTO "%s"."employees" 
-	("created_at","updated_at", "name", "password", "email", "id") 
-	VALUES (?, ?, ?, ?, ?, ?);`, schema)
-	res := em.db.Debug().Exec(query, &newEmployee.UpdatedAt, &newEmployee.UpdatedAt,
-		&newEmployee.Name,
-		&newEmployee.Password,
-		&newEmployee.Email,
-		&newEmployee.ID)
-	err := res.Error
-	if err != nil {
-		// return Todo{}, err
-		return false, err
-
-	}
-	rowsAffected := res.RowsAffected
-	if rowsAffected > 0 {
+	if rowsAffected <= 0 {
 		// return Todo{}, err
 		err = fmt.Errorf("no rows affected")
 		return false, err

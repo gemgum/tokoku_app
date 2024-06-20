@@ -29,13 +29,10 @@ func main() {
 
 	em := models.NewEmployeeModel(connection)
 	ec := controllers.NewEmployeeController(em)
-	ec.IntializeAdminAccount()
-	// data, err := cm.Login()
-	// uc := controllers.(um)
-	// im.SelectItem(setup)
 
-	// cm.Register()
-	// ic.InserItem(1)
+	am := models.NewAdminModel(connection)
+	ac := controllers.NewAdminController(am)
+	ac.IntializeAdminAccount()
 
 	scanner := bufio.NewScanner(os.Stdin)
 	// var currentUser *models.Employee
@@ -69,7 +66,6 @@ func main() {
 				if data.ID == 0 {
 					fmt.Println("6. Hapus Data")
 				}
-
 				fmt.Println("9. Keluar")
 				fmt.Print("Masukkan input: ")
 				scanner.Scan()
@@ -96,9 +92,8 @@ func main() {
 
 				case "6":
 
-					for {
-						scanner.Scan()
-						choice3 := scanner.Text()
+					for choice2 == "6" {
+
 						fmt.Println("Selamat datang di menu admin")
 						fmt.Println("Pilih menu")
 						fmt.Println("1. Pendaftaran Pegawai")
@@ -107,14 +102,22 @@ func main() {
 						fmt.Println("4. Hapus Transaksi Barang")
 						fmt.Println("5. Hapus Data Customer")
 						fmt.Println("6. Hapus Data Pegawai")
-
+						fmt.Println("9. Keluar")
+						scanner.Scan()
+						choice3 := scanner.Text()
 						switch choice3 {
 						case "1":
 							_, err := ec.Register()
 							if err != nil {
 								fmt.Println(err)
 							}
+						case "2":
+							_, err := ic.RemoveItem()
+							if err != nil {
+								fmt.Println(err)
+							}
 						}
+
 					}
 				}
 
