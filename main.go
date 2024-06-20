@@ -90,7 +90,12 @@ func main() {
 					if err != nil {
 						fmt.Println(err)
 					}
-
+				case "5":
+					_, err := ic.ShowTransaction(data.ID)
+					if err != nil {
+						fmt.Println(err)
+					}
+					// fmt.Println(trxData)
 				case "6":
 
 					for choice2 == "6" {
@@ -104,6 +109,7 @@ func main() {
 						fmt.Println("5. Hapus Data Customer")
 						fmt.Println("6. Hapus Data Pegawai")
 						fmt.Println("9. Keluar")
+						fmt.Print("Masukan Pilihan ")
 						scanner.Scan()
 						choice3 := scanner.Text()
 						switch choice3 {
@@ -114,6 +120,26 @@ func main() {
 							}
 						case "2":
 							_, err := ic.RemoveItem()
+							if err != nil {
+								fmt.Println(err)
+							}
+						case "3":
+							err := ic.DeleteTransaction()
+							if err != nil {
+								fmt.Println(err)
+							}
+						case "4":
+							err := ic.DeleteItemTransaction()
+							if err != nil {
+								fmt.Println(err)
+							}
+						case "5":
+							err := ic.DeleteCustomer()
+							if err != nil {
+								fmt.Println(err)
+							}
+						case "6":
+							err := ic.DeleteEmployee()
 							if err != nil {
 								fmt.Println(err)
 							}

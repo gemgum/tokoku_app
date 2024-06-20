@@ -147,9 +147,12 @@ func (ic *ItemController) ItemEdit(id uint) (models.Item, error) {
 	return newItemEdit, nil
 }
 
-func (ic *ItemController) DeleteTransaction(id uint) error {
-	var newData models.Item
-	newData.ID = id
+func (ic *ItemController) DeleteTransaction() error {
+	var newData models.Transaction
+	newData.UpdatedAt = time.Now()
+	fmt.Print("\nHapus Data Transaksi ")
+	fmt.Print("Masukkan ID Transaksi : ")
+	fmt.Scanln(&newData.ID)
 	result, err := ic.model.DeleteTransaction("public", newData)
 	if err != nil {
 		return fmt.Errorf("terjadi masalah ketika menghapus transaksi: %v", err)
@@ -160,9 +163,13 @@ func (ic *ItemController) DeleteTransaction(id uint) error {
 	return nil
 }
 
-func (ic *ItemController) DeleteItemTransaction(id uint) error {
-	var newData models.Item
-	newData.ID = id
+func (ic *ItemController) DeleteItemTransaction() error {
+	var newData models.ItemTransaction
+	// newData.ID = id
+	newData.UpdatedAt = time.Now()
+	fmt.Print("\nHapus Data Transaksi Barang ")
+	fmt.Print("Masukkan ID Transaksi Barang : ")
+	fmt.Scanln(&newData.ID)
 	result, err := ic.model.DeleteItemTransaction("public", newData)
 	if err != nil {
 		return fmt.Errorf("terjadi masalah ketika menghapus transaksi: %v", err)
@@ -172,6 +179,41 @@ func (ic *ItemController) DeleteItemTransaction(id uint) error {
 	}
 	return nil
 }
+
+func (cc *ItemController) DeleteCustomer() error {
+	var newData models.Customer
+	// newData.ID = id
+	newData.UpdatedAt = time.Now()
+	fmt.Print("\nHapus Data Customer ")
+	fmt.Print("Masukkan ID Customer : ")
+	fmt.Scanln(&newData.ID)
+	result, err := cc.model.DeleteCustomerData("public", newData)
+	if err != nil {
+		return fmt.Errorf("terjadi masalah ketika menghapus transaksi: %v", err)
+	}
+	if !result {
+		return errors.New("gagal menghapus transaksi, id tidak ditemukan")
+	}
+	return nil
+}
+
+func (ec *ItemController) DeleteEmployee() error {
+	var newData models.Employee
+	// newData.ID = id
+	newData.UpdatedAt = time.Now()
+	fmt.Print("\nHapus Data Employee ")
+	fmt.Print("Masukkan ID Employee : ")
+	fmt.Scanln(&newData.ID)
+	result, err := ec.model.DeleteEmployee("public", newData)
+	if err != nil {
+		return fmt.Errorf("terjadi masalah ketika menghapus transaksi: %v", err)
+	}
+	if !result {
+		return errors.New("gagal menghapus transaksi, id tidak ditemukan")
+	}
+	return nil
+}
+
 func (ic *ItemController) RemoveItem() (models.Item, error) {
 
 	var newData models.Item
@@ -188,4 +230,34 @@ func (ic *ItemController) RemoveItem() (models.Item, error) {
 		return models.Item{}, errors.New("terjadi masalah ketika memasukan data")
 	}
 	return newData, nil
+}
+
+func (tc *ItemController) ShowTransaction(idEmployee uint) ([]models.TransactionResult, error) {
+	var trx models.Transaction
+	fmt.Print("Menampilkan Data Transaksi ")
+	// fmt.Scanln(&showTodoData.Activity)
+	trx.Employee = idEmployee
+
+	fmt.Print("\nMasukkan ID Customer : ")
+	val, err := strconv.Atoi(getScanner())
+	if err != nil {
+		fmt.Println(err)
+	}
+	trx.Customer = uint(val)
+
+	// trx.Customer = idCustomer
+	trxRrv, err := tc.model.ShowTransaction(trx)
+	if err != nil {
+		return trxRrv, err
+	}
+	// fmt.Println("type", reflect.TypeOf(showTodoData))
+	fmt.Println()
+	fmt.Println()
+	for _, result := range trxRrv {
+		fmt.Printf("Tanggal Transaksi: %v, Nama Barang: %s, Jumlah: %d, Pembeli: %s, Pegawai: %s\n",
+			result.TanggalTransaksi, result.NamaBarang, result.Jumlah, result.Pembeli, result.Pegawai)
+	}
+	fmt.Println()
+	fmt.Println()
+	return trxRrv, nil
 }
