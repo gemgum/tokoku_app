@@ -61,7 +61,9 @@ func (ic *ItemController) InsertCustomer(id uint) (models.Customer, error) {
 	newData.UpdatedAt = time.Now()
 	fmt.Print("\nPendaftaran Customer Baru\n")
 	fmt.Print("Masukkan Nama ")
-	fmt.Scanln(&newData.Name)
+	newData.Name = getScanner()
+
+	// fmt.Scanln(&newData.Name)
 	fmt.Print("Masukkan Nomer Telfon ")
 	fmt.Scanln(&newData.Phone)
 	fmt.Print("Masukkan Alamat ")
@@ -90,23 +92,57 @@ func (tc *ItemController) InsertTransaction(id_employee uint, id_customer uint) 
 		return models.Transaction{}, models.ItemTransaction{}, errors.New("terjadi masalah ketika membuat transaksi")
 	}
 	var newDataTrxItem models.ItemTransaction
+	var newDataItem models.Item
 	newDataTrxItem.UpdatedAt = time.Now()
+	newDataItem.UpdatedAt = time.Now()
 	var lanjutBeli string = "Y"
+	var showDataTrxById bool = false
 	for lanjutBeli == "Y" {
-		fmt.Print("\nMasukkan Barang Yang Dibeli ")
-		fmt.Scanln(&newDataTrxItem.Item)
-
+		fmt.Print("\nMasukkan ID Barang Yang Dibeli ")
+		var idItem uint = 0
+		fmt.Scanln(&idItem)
+		newDataTrxItem.Item = idItem
 		fmt.Print("Masukkan Jumlah Barang Yang dibeli ")
 		fmt.Scanln(&newDataTrxItem.Amount)
-
-		result, err := tc.model.InsertItemTransaction("public", uint(trxId), newDataTrxItem)
-		if err != nil && !result {
-			return models.Transaction{}, models.ItemTransaction{}, errors.New("terjadi masalah ketika membuat transaksi item")
+		hasil, _ := tc.model.SelectSumarrytItem(newDataTrxItem.Item)
+		if hasil > newDataTrxItem.Amount {
+			result, err := tc.model.InsertItemTransaction("public", uint(trxId), newDataTrxItem)
+			if err != nil && !result {
+				return models.Transaction{}, models.ItemTransaction{}, errors.New("terjadi masalah ketika membuat transaksi item")
+			} else {
+				newDataItem.ID = idItem
+				fmt.Println("Item ID", newDataItem.ID)
+				newDataItem.ItemStock = hasil - newDataTrxItem.Amount
+				result, err = tc.model.DecreItem("public", newDataItem)
+				if err != nil && !result {
+					return models.Transaction{}, models.ItemTransaction{}, errors.New("terjadi masalah ketika membuat update jumlah item")
+				}
+				showDataTrxById = true
+			}
+		} else {
+			fmt.Println("Barang kurang / Tidak Tersedia")
+			continue
 		}
+
 		fmt.Print("Lanjutkan membeli ? (Y/n) ")
 		fmt.Scanln(&lanjutBeli)
 	}
 	// newDataTrx.Employee = newDataTrx.ID
+
+	// trx.Customer = idCustomer
+	if showDataTrxById {
+		trxRrv, err := tc.model.ShowTransactionTodayByCustomer(newDataTrx)
+		if err != nil {
+			return models.Transaction{}, models.ItemTransaction{}, errors.New("terjadi masalah ketika menampilkan data transaksi")
+		}
+		fmt.Println()
+		fmt.Println("Nota Pembelian")
+		for _, result := range trxRrv {
+			fmt.Printf("Tanggal Transaksi: %v, Nama Barang: %s, Jumlah: %d, Pembeli: %s, Pegawai: %s\n",
+				result.TanggalTransaksi, result.NamaBarang, result.Jumlah, result.Pembeli, result.Pegawai)
+		}
+	}
+	fmt.Println()
 
 	return newDataTrx, newDataTrxItem, nil
 }
@@ -116,7 +152,9 @@ func (ic *ItemController) ItemUpdateInfo(id uint) (models.Item, error) {
 	newUpdateItem.UpdatedAt = time.Now()
 	fmt.Print("\nEdit Data Item ")
 	fmt.Print("Masukkan Nama ")
-	fmt.Scanln(&newUpdateItem.ItemName)
+	newUpdateItem.ItemName = getScanner()
+
+	// fmt.Scanln(&newUpdateItem.ItemName)
 	fmt.Print("Masukkan Jumlah ")
 	fmt.Scanln(&newUpdateItem.ItemStock)
 	fmt.Print("Masukkan Harga ")
@@ -134,7 +172,8 @@ func (ic *ItemController) ItemEdit(id uint) (models.Item, error) {
 	newItemEdit.UpdatedAt = time.Now()
 	fmt.Print("\nEdit Data Item ")
 	fmt.Print("Masukkan Nama ")
-	fmt.Scanln(&newItemEdit.ItemName)
+	newItemEdit.ItemName = getScanner()
+	// fmt.Scanln(&newItemEdit.ItemName)
 	fmt.Print("Masukkan Jumlah ")
 	fmt.Scanln(&newItemEdit.ItemStock)
 	fmt.Print("Masukkan Harga ")
@@ -246,7 +285,7 @@ func (tc *ItemController) ShowTransaction(idEmployee uint) ([]models.Transaction
 	trx.Customer = uint(val)
 
 	// trx.Customer = idCustomer
-	trxRrv, err := tc.model.ShowTransaction(trx)
+	trxRrv, err := tc.model.ShowTransactionAll(trx)
 	if err != nil {
 		return trxRrv, err
 	}

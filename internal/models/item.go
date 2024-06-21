@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"time"
 
-	"tokoku_app/configs"
-
 	"gorm.io/gorm"
 )
 
@@ -51,21 +49,33 @@ func NewItemModel(connection *gorm.DB) *ItemModel {
 	}
 }
 
-func (im *ItemModel) SelectItem(s configs.Setting) ([]Item, error) {
+func (im *ItemModel) SelectSumarrytItem(s uint) (uint, error) {
 	todos := make([]Item, 0)
-	query := fmt.Sprintf("SELECT * FROM \"%s\".\"items\" WHERE \"items\".\"deleted_at\" IS NULL;", "public")
+	// query := fmt.Sprintf("SELECT * FROM \"%s\".\"items\" WHERE \"items\".\"deleted_at\" IS NULL;", "public")
+	query := fmt.Sprintf(`SELECT item_stock FROM %s.items WHERE id = ? AND deleted_at IS NULL;`, "public")
+
 	// err := im.db.Debug().Exec(query, &s.Dbschema).Error
-	var items []Item
+	// var items []Item
 
-	err := im.db.Debug().Raw(query).Scan(&items).Error
+	err := im.db.Debug().Raw(query, s).Scan(&todos).Error
 
-	fmt.Println(items)
+	// todos = append(todos, items...)
+	var rv uint
+	for _, result := range todos {
+		// fmt.Printf("Tanggal Transaksi: %v, Nama Barang: %s, Jumlah: %d, Pembeli: %d, Pegawai: %d\n",
+		// 	result.UpdatedAt, result.ItemName, result.ItemStock, result.Price, result.Employee)
+
+		fmt.Printf("Jumlah: %d\n",
+			result.ItemStock)
+		rv = result.ItemStock
+	}
+	// fmt.Println(items)
 	if err != nil {
 		// return Todo{}, err
-		return nil, err
+		return 0, err
 
 	}
-	return todos, nil
+	return rv, nil
 }
 
 func (im *ItemModel) InsertItem(schema string, item Item) (bool, error) {
@@ -128,13 +138,33 @@ func (cm *ItemModel) InsertTransaction(schema string, trx Transaction) (int, boo
 	return TrxId, true, nil
 }
 
-func (cm *ItemModel) InsertItemTransaction(schema string, trx_id uint, trx_item ItemTransaction) (bool, error) {
+func (iit *ItemModel) InsertItemTransaction(schema string, trx_id uint, trx_item ItemTransaction) (bool, error) {
 
 	query := fmt.Sprintf(`INSERT INTO "%s"."item_transactions" 
 	("created_at","updated_at", "amount", "item", "trx_id") 
 	VALUES (?, ?, ?, ?, ?);`, schema)
 	trx_item.TrxId = trx_id
-	res := cm.db.Debug().Exec(query, &trx_item.UpdatedAt, &trx_item.UpdatedAt, &trx_item.Amount, &trx_item.Item, &trx_item.TrxId)
+	res := iit.db.Debug().Exec(query, &trx_item.UpdatedAt, &trx_item.UpdatedAt, &trx_item.Amount, &trx_item.Item, &trx_item.TrxId)
+
+	err := res.Error
+	if err != nil {
+		return false, err
+	}
+	rowsAffected := res.RowsAffected
+	if rowsAffected <= 0 {
+		err = fmt.Errorf("no rows affected")
+		return false, err
+
+	}
+	return true, nil
+
+}
+
+func (cm *ItemModel) DecreItem(schema string, item Item) (bool, error) {
+
+	query := fmt.Sprintf(`UPDATE "%s"."items"
+	SET "updated_at" = ?, "item_stock"= ? WHERE "items"."id" = ?;`, schema)
+	res := cm.db.Debug().Exec(query, &item.UpdatedAt, &item.ItemStock, &item.ID)
 
 	err := res.Error
 	if err != nil {
@@ -279,7 +309,7 @@ type TransactionResult struct {
 	Pegawai          string    `json:"pegawai"`
 }
 
-func (tm *ItemModel) ShowTransaction(trx Transaction) ([]TransactionResult, error) {
+func (tm *ItemModel) ShowTransactionTodayByCustomer(trx Transaction) ([]TransactionResult, error) {
 	trxRv := make([]TransactionResult, 0)
 	query := `select 
      it.created_at as tanggal_transaksi,
@@ -290,7 +320,29 @@ func (tm *ItemModel) ShowTransaction(trx Transaction) ([]TransactionResult, erro
  	 from transactions t
  	 join employees e on e.id = t.employee 
  	 join item_transactions it on it.trx_id = t.id
- 	 where t.customer = ? and t.employee = ?;`
+ 	 where t.customer = ? and t.employee = ? and DATE(it.created_at) = CURRENT_DATE;`
+	err := tm.db.Debug().Raw(query, &trx.Customer, &trx.Employee).Scan(&trxRv).Error
+	fmt.Println(query)
+	if err != nil {
+		// return Todo{}, err
+		return nil, err
+
+	}
+	return trxRv, nil
+}
+
+func (tm *ItemModel) ShowTransactionAll(trx Transaction) ([]TransactionResult, error) {
+	trxRv := make([]TransactionResult, 0)
+	query := `select 
+     it.created_at as tanggal_transaksi,
+     it.item as nama_barang,
+     it.amount as jumlah,
+     t.customer as pembeli,
+     t.employee as pegawai
+ 	 from transactions t
+ 	 join employees e on e.id = t.employee 
+ 	 join item_transactions it on it.trx_id = t.id
+ 	 where t.customer = ? ;`
 	err := tm.db.Debug().Raw(query, &trx.Customer, &trx.Employee).Scan(&trxRv).Error
 	fmt.Println(query)
 	if err != nil {
