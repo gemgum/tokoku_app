@@ -41,7 +41,7 @@ func main() {
 		fmt.Println("1. login")
 		// fmt.Println("2. register")
 		// fmt.Println("3. Hapus Item")
-		fmt.Println("4. logout")
+		fmt.Println("4. close")
 		fmt.Print("masukkan pilihan : ")
 		scanner.Scan()
 		choice := scanner.Text()
@@ -65,13 +65,16 @@ func main() {
 				fmt.Println("5. Edit Barang")
 				fmt.Println("6. Update Jumlah Barang")
 				if data.ID == 0 {
-					fmt.Println("6. Hapus Data")
+					fmt.Println("7. Hapus Data")
 				}
 				fmt.Println("99. Keluar")
 				fmt.Print("Masukkan input: ")
 				scanner.Scan()
 				choice2 := scanner.Text()
+
 				switch choice2 {
+				case "99":
+					isLogin = false
 				case "1":
 					_, err := ic.InserItem(data.ID)
 					if err != nil {
@@ -107,57 +110,65 @@ func main() {
 						fmt.Println(err)
 					}
 				case "7":
-					for choice2 == "7" {
-						fmt.Println("Selamat datang di menu admin")
-						fmt.Println("Pilih menu")
-						fmt.Println("1. Pendaftaran Pegawai")
-						fmt.Println("2. Hapus Barang")
-						fmt.Println("3. Hapus Transaksi")
-						fmt.Println("4. Hapus Transaksi Barang")
-						fmt.Println("5. Hapus Data Customer")
-						fmt.Println("6. Hapus Data Pegawai")
-						fmt.Println("99. Keluar")
-						fmt.Print("Masukan Pilihan ")
-						scanner.Scan()
-						choice3 := scanner.Text()
-						switch choice3 {
-						case "1":
-							_, err := ec.Register()
-							if err != nil {
-								fmt.Println(err)
+					var isAdmin bool = true
+					if data.ID == 0 {
+						for isAdmin {
+							fmt.Println("Selamat datang di menu admin")
+							fmt.Println("Pilih menu")
+							fmt.Println("1. Pendaftaran Pegawai")
+							fmt.Println("2. Hapus Barang")
+							fmt.Println("3. Hapus Transaksi")
+							fmt.Println("4. Hapus Transaksi Barang")
+							fmt.Println("5. Hapus Data Customer")
+							fmt.Println("6. Hapus Data Pegawai")
+							fmt.Println("99. Keluar")
+							fmt.Print("Masukan Pilihan ")
+							scanner.Scan()
+							choice3 := scanner.Text()
+							switch choice3 {
+							case "99":
+								isAdmin = false
+								choice2 = "0"
+							case "1":
+								_, err := ec.Register()
+								if err != nil {
+									fmt.Println(err)
+								}
+							case "2":
+								_, err := ic.RemoveItem()
+								if err != nil {
+									fmt.Println(err)
+								}
+							case "3":
+								err := ic.DeleteTransaction()
+								if err != nil {
+									fmt.Println(err)
+								}
+							case "4":
+								err := ic.DeleteItemTransaction()
+								if err != nil {
+									fmt.Println(err)
+								}
+							case "5":
+								err := ic.DeleteCustomer()
+								if err != nil {
+									fmt.Println(err)
+								}
+							case "6":
+								err := ic.DeleteEmployee()
+								if err != nil {
+									fmt.Println(err)
+								}
+							default:
+								fmt.Println("Pilihan tidak tersedia")
 							}
-						case "2":
-							_, err := ic.RemoveItem()
-							if err != nil {
-								fmt.Println(err)
-							}
-						case "3":
-							err := ic.DeleteTransaction()
-							if err != nil {
-								fmt.Println(err)
-							}
-						case "4":
-							err := ic.DeleteItemTransaction()
-							if err != nil {
-								fmt.Println(err)
-							}
-						case "5":
-							err := ic.DeleteCustomer()
-							if err != nil {
-								fmt.Println(err)
-							}
-						case "6":
-							err := ic.DeleteEmployee()
-							if err != nil {
-								fmt.Println(err)
-							}
-						default:
-							fmt.Println("Pilihan tidak tersedia")
-						}
 
+						}
 					}
 				default:
-					fmt.Println("Pilihan tidak tersedia")
+					if choice2 != "0" {
+						fmt.Println("Pilihan tidak tersedia")
+					}
 
 				}
 
