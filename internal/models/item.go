@@ -343,7 +343,7 @@ func (tm *ItemModel) ShowTransactionAll(trx Transaction) ([]TransactionResult, e
  	 join employees e on e.id = t.employee 
  	 join item_transactions it on it.trx_id = t.id
  	 where t.customer = ? ;`
-	err := tm.db.Debug().Raw(query, &trx.Customer, &trx.Employee).Scan(&trxRv).Error
+	err := tm.db.Debug().Raw(query, &trx.Customer).Scan(&trxRv).Error
 	fmt.Println(query)
 	if err != nil {
 		// return Todo{}, err

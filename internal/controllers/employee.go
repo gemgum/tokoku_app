@@ -17,6 +17,13 @@ func NewEmployeeController(m *models.EmployeeModel) *EmployeeController {
 	}
 }
 
+// func getScanner() string {
+// 	scanner := bufio.NewScanner(os.Stdin)
+// 	scanner.Scan()
+// 	choice := scanner.Text()
+// 	return choice
+// }
+
 func (uc *EmployeeController) Login() (models.Employee, error) {
 	var email, password string
 	fmt.Print("Masukkan email ")
@@ -34,11 +41,14 @@ func (uc *EmployeeController) Register() (models.Employee, error) {
 	var newData models.Employee
 	newData.UpdatedAt = time.Now()
 	fmt.Print("Masukkan Nama ")
-	fmt.Scanln(&newData.Name)
+	// fmt.Scanln(&newData.Name)
+	newData.Name = getScanner()
 	fmt.Print("Masukkan Email ")
-	fmt.Scanln(&newData.Email)
+	// fmt.Scanln(&newData.Email)
+	newData.Email = getScanner()
 	fmt.Print("Masukkan Password ")
-	fmt.Scanln(&newData.Password)
+	// fmt.Scanln(&newData.Password)
+	newData.Password = getScanner()
 	result, err := uc.model.Register("public", newData)
 	if err != nil && !result {
 		return models.Employee{}, errors.New("terjadi masalah ketika registrasi")

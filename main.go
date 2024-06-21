@@ -65,7 +65,7 @@ func main() {
 				fmt.Println("5. Edit Barang")
 				fmt.Println("6. Update Jumlah Barang")
 				if data.ID == 0 {
-					fmt.Println("7. Hapus Data")
+					fmt.Println("7. Fitur Admin")
 				}
 				fmt.Println("99. Keluar")
 				fmt.Print("Masukkan input: ")
